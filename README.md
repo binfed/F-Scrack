@@ -18,7 +18,7 @@
 	python Scrack.py -h 10.111.1  
 	python Scrack.py -h 192.168.1.1 -d pass.txt  
 	python Scrack.py -h 10.111.1.1-10.111.2.254 -p 3306,5432 -m 200 -t 6  
-	python NAScan.py -h ip.ini -n  
+	python Scrack.py -h ip.ini -n  
 5. **特别声明**  
 	此脚本仅可用于授权的渗透测试以及自身的安全检测中。  
 	此脚本仅用于学习以及使用，可自由进行改进，禁止提取加入任何有商业行为的产品中。  
