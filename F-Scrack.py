@@ -50,28 +50,35 @@ class Crack():
                 result = k(user,pass_)
                 if result:return result
     def ftp(self,user,pass_):
+        ftp = ftplib.FTP()
         try:
-            ftp=ftplib.FTP()
             ftp.connect(self.ip,self.port)
             ftp.login(user,pass_)
             if user == 'ftp':return "anonymous"
             return "username:%s,password:%s"%(user,pass_)
         except Exception,e:
             pass
+        finally:
+            ftp.close()
     def mysql(self,user,pass_):
-        sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        sock.connect((self.ip,self.port))
-        packet = sock.recv(254)
-        plugin,scramble = self.get_scramble(packet)
-        if not scramble:return 3
-        auth_data = self.get_auth_data(user,pass_,scramble,plugin)
-        sock.send(auth_data)
-        result = sock.recv(1024)
-        if result == "\x07\x00\x00\x02\x00\x00\x00\x02\x00\x00\x00":
-            return "username:%s,password:%s" % (user,pass_)
-    def postgresql(self,user,pass_):#author:hos@YSRC
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+            sock.connect((self.ip,self.port))
+            packet = sock.recv(254)
+            plugin,scramble = self.get_scramble(packet)
+            if not scramble:return 3
+            auth_data = self.get_auth_data(user,pass_,scramble,plugin)
+            sock.send(auth_data)
+            result = sock.recv(1024)
+            if result == "\x07\x00\x00\x02\x00\x00\x00\x02\x00\x00\x00":
+                return "username:%s,password:%s" % (user,pass_)
+        except:
+            pass
+        finally:
+            sock.close()
+    def postgresql(self,user,pass_):#author:hos@YSRC
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
             sock.connect((self.ip,self.port))
             packet_length = len(user) + 7 +len("\x03user  database postgres application_name psql client_encoding UTF8  ")
             p="%c%c%c%c%c\x03%c%cuser%c%s%cdatabase%cpostgres%capplication_name%cpsql%cclient_encoding%cUTF8%c%c"%( 0,0,0,packet_length,0,0,0,0,user,0,0,0,0,0,0,0,0)
@@ -96,9 +103,11 @@ class Crack():
                 return "username:%s,password:%s" % (user,pass_)
         except Exception,e:
             return 3
+        finally:
+            sock.close()
     def redis(self,user,pass_):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((self.ip,int(self.port)))
             s.send("INFO\r\n")
             result = s.recv(1024)
@@ -114,9 +123,11 @@ class Crack():
                         return "username:%s,password:%s" % (user,pass_)
         except Exception,e:
             return 3
+        finally:
+            s.close()
     def mssql(self,user,pass_):#author:hos@YSRC
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.connect((self.ip,self.port))
             hh=binascii.b2a_hex(self.ip)
             husername=binascii.b2a_hex(user)
@@ -149,9 +160,11 @@ class Crack():
                 return "username:%s,password:%s" % (user,pass_)
         except:
             return 3
+        finally:
+            sock.close()
     def mongodb(self,user,pass_):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((self.ip,self.port))
             data = binascii.a2b_hex("3a000000a741000000000000d40700000000000061646d696e2e24636d640000000000ffffffff130000001069736d6173746572000100000000")
             s.send(data)
@@ -165,13 +178,20 @@ class Crack():
                 else:return 3
         except Exception,e:
             return 3
+        finally:
+            s.close()
     def memcached(self,user,pass_):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.ip,self.port))
-        s.send("stats\r\n")
-        result = s.recv(1024)
-        if "version" in result:
-            return "unauthorized"
+        try:
+            s.connect((self.ip,self.port))
+            s.send("stats\r\n")
+            result = s.recv(1024)
+            if "version" in result:
+                return "unauthorized"
+        except:
+            pass
+        finally:
+            s.close()
     def elasticsearch(self,user,pass_):
         url = "http://"+self.ip+":"+str(self.port)+"/_cat"
         data = urllib2.urlopen(url).read()
