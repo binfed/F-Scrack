@@ -37,7 +37,7 @@ REGEX = [['ftp', '21', '^220.*?ftp|^220-|^220 Service|^220 FileZilla'],  ['telne
 class Crack():
     def __init__(self,ip,port,server,timeout):
         self.ip = ip
-        self.port = port
+        self.port = int(port)
         self.server = server
         self.timeout = timeout
     def run(self):
@@ -60,7 +60,7 @@ class Crack():
             pass
     def mysql(self,user,pass_):
         sock = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        sock.connect((self.ip,int(self.port)))
+        sock.connect((self.ip,self.port))
         packet = sock.recv(254)
         plugin,scramble = self.get_scramble(packet)
         if not scramble:return 3
@@ -72,7 +72,7 @@ class Crack():
     def postgresql(self,user,pass_):#author:hos@YSRC
         try:
             sock=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-            sock.connect((self.ip,int(self.port)))
+            sock.connect((self.ip,self.port))
             packet_length = len(user) + 7 +len("\x03user  database postgres application_name psql client_encoding UTF8  ")
             p="%c%c%c%c%c\x03%c%cuser%c%s%cdatabase%cpostgres%capplication_name%cpsql%cclient_encoding%cUTF8%c%c"%( 0,0,0,packet_length,0,0,0,0,user,0,0,0,0,0,0,0,0)
             sock.send(p)
@@ -107,7 +107,7 @@ class Crack():
             elif "Authentication" in result:
                 for pass_ in PASSWORD_DIC:
                     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    s.connect((self.ip,int(self.port)))
+                    s.connect((self.ip,self.port))
                     s.send("AUTH %s\r\n"%(pass_))
                     result = s.recv(1024)
                     if '+OK' in result:
@@ -152,7 +152,7 @@ class Crack():
     def mongodb(self,user,pass_):
         try:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((self.ip,int(self.port)))
+            s.connect((self.ip,self.port))
             data = binascii.a2b_hex("3a000000a741000000000000d40700000000000061646d696e2e24636d640000000000ffffffff130000001069736d6173746572000100000000")
             s.send(data)
             result = s.recv(1024)
@@ -167,7 +167,7 @@ class Crack():
             return 3
     def memcached(self,user,pass_):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect((self.ip,int(self.port)))
+        s.connect((self.ip,self.port))
         s.send("stats\r\n")
         result = s.recv(1024)
         if "version" in result:
