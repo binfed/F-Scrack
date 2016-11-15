@@ -84,18 +84,14 @@ class Crack():
             p="%c%c%c%c%c\x03%c%cuser%c%s%cdatabase%cpostgres%capplication_name%cpsql%cclient_encoding%cUTF8%c%c"%( 0,0,0,packet_length,0,0,0,0,user,0,0,0,0,0,0,0,0)
             sock.send(p)
             packet = sock.recv(1024)
-            psql_salt=[]
             if packet[0]=='R':
-                a=str([packet[4]])
-                b=int(a[4:6],16)
                 authentication_type=str([packet[8]])
                 c=int(authentication_type[4:6],16)
-                if c==5:psql_salt=packet[9:]
+                if c==5:salt=packet[9:]
+                else:return 3
             else:return 3
-            buf=[]
-            salt = psql_salt
-            lmd5= self.make_response(buf,user,pass_,salt)
-            packet_length1=len(lmd5)+5+len('p')
+            lmd5= self.make_response(user,pass_,salt)
+            packet_length1=len(lmd5)+6
             pp='p%c%c%c%c%s%c'%(0,0,0,packet_length1 - 1,lmd5,0)
             sock.send(pp)
             packet1 = sock.recv(1024)
@@ -273,7 +269,7 @@ class Crack():
         len_hex = hex(len(data)/2).replace("0x","")
         auth_data = len_hex + "000001" +data
         return binascii.a2b_hex(auth_data)
-    def make_response(self,buf,username,password,salt):
+    def make_response(self,username,password,salt):
         pu=hashlib.md5(password+username).hexdigest()
         buf=hashlib.md5(pu+salt).hexdigest()
         return 'md5'+buf
@@ -539,4 +535,4 @@ Usage: python F-Scrack.py -h 192.168.1 [-p 21,80,3306] [-m 50] [-t 10] [-d pass.
                 t.start()
             t_join(m_count)
     except Exception,e:
-          print msg
+          print msg                                                      
