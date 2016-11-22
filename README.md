@@ -1,6 +1,6 @@
 # F-Scrack
 
-**F-Scrack** is a single file bruteforcer supports multi-protocol, no extra library requires except python standard library, Which is ideal for a quick test.
+**F-Scrack** is a single file bruteforcer supports multi-protocol, no extra library requires except python standard library, which is ideal for a quick test.
 
 Currently support protocol:
 FTP, MySQL, MSSQL，MongoDB，Redis，Telnet，Elasticsearch，PostgreSQL.
